@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16.2
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+      TZ: ${TIMEZONE}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_TIMEZONE: ${TIMEZONE}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  bot:
+    build: .
+    env_file:
+      - .env
+    restart: on-failure
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TIMEZONE}
+    volumes:
+      # - ./:/app # Пробрасываем текущую директорию в контейнер
+      - ./app:/app
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  pgadmin:

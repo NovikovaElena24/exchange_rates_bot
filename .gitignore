@@ -1,0 +1,8 @@
+.env
+
+.mypy_cache/
+.vscode/
+venv/
+trash/
+__pycache__/
+.DS_Store
